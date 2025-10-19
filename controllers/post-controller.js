@@ -48,16 +48,73 @@ const PostController = {
 
       res.json(postWithLikeInfo);
     } catch (e) {
-      console.error('get all posts error', e)
+      console.error('get all posts error', e);
 
       return res.status(500).json({ error: 'Internal Server Error!' });
     }
   },
   getPostById: async (req, res) => {
-    res.send('getPostById');
+    const { id } = req.params;
+    const userId = req.user.userId;
+
+    try {
+      const post = await prisma.post.findUnique({
+        where: { id },
+        include: {
+          comments: {
+            include: {
+              user: true,
+            },
+          },
+          likes: true,
+          author: true,
+        },
+      });
+
+      if (!post) {
+        return res.status(404).json({ error: 'Пост не найден!' });
+      }
+
+      const postWithLikeInfo = {
+        ...post,
+        likedByUser: post.likes.some(like => like.userId === userId),
+      };
+
+      res.json(postWithLikeInfo);
+    } catch (e) {
+      console.error('Get post by ID error error', e);
+
+      return res.status(500).json({ error: 'Internal Server Error!' });
+    }
   },
   deletePost: async (req, res) => {
-    res.send('deletePost');
+    const { id } = req.params;
+
+    const post = await prisma.post.findUnique({ where: { id } });
+
+    if (!post) {
+      return res.status(404).json({ error: 'Пост не найден' });
+    }
+
+    if (post.authorId !== req.user.userId) {
+      return res.status(403).json({ error: 'Нет доступа!' });
+    }
+
+    try {
+      const transaction = await prisma.$transaction([
+        prisma.comment.deleteMany({ where: { postId: id } }),
+        prisma.like.deleteMany({ where: { postId: id } }),
+        prisma.post.delete({ where: { id } }),
+      ]);
+
+      res.json(transaction);
+
+
+    } catch (e) {
+      console.error('Delete post error error', e);
+
+      return res.status(500).json({ error: 'Internal Server Error!' });
+    }
   },
 };
 
