@@ -1,0 +1,17 @@
+version: '3' # версия синтаксиса
+services:
+  express-app: # Сервер Express
+    build: .
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: 'mongodb://monty:pass@db:27017/db?authSource=admin&directConnection=true'
+  db: # База данных
+    image: prismagraphql/mongo-single-replica:4.4.3-bionic
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: monty
+      MONGO_INITDB_ROOT_PASSWORD: pass
