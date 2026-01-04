@@ -1,6 +1,7 @@
-version: '3' # версия синтаксиса
+version: '3'
+
 services:
-  express-app: # Сервер Express
+  express-app:
     build: .
     ports:
       - '3000:3000'
@@ -8,7 +9,18 @@ services:
       - db
     environment:
       DATABASE_URL: 'mongodb://monty:pass@db:27017/db?authSource=admin&directConnection=true'
-  db: # База данных
+
+  prisma-studio:
+    build: .
+    command: npx prisma studio --hostname 0.0.0.0 --port 5555
+    ports:
+      - '5555:5555'
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: 'mongodb://monty:pass@db:27017/db?authSource=admin&directConnection=true'
+
+  db:
     image: prismagraphql/mongo-single-replica:4.4.3-bionic
     ports:
       - '27017:27017'

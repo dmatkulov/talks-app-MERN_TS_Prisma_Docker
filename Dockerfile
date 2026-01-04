@@ -13,11 +13,11 @@ RUN npm install
 # Копируем оставшееся приложение в контейнер
 COPY . .
 
-# Prisma
-RUN npm install -g prisma
+## Prisma
+#RUN npm install -g prisma
 
-# Генерируем prisma client
-RUN prisma generate
+# Генерируем Prisma Client через локальную версию
+RUN npx prisma generate
 
 # Копируем prisma schema
 COPY prisma/schema.prisma ./prisma/
