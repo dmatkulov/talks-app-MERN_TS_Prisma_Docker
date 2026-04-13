@@ -16,11 +16,11 @@ COPY . .
 ## Prisma
 #RUN npm install -g prisma
 
-# Генерируем Prisma Client через локальную версию
-RUN npx prisma generate
-
 # Копируем prisma schema
 COPY prisma/schema.prisma ./prisma/
+
+# Генерируем Prisma Client через локальную версию
+RUN npx prisma generate
 
 # Открыть порт в нашем контейнере
 EXPOSE 3000
